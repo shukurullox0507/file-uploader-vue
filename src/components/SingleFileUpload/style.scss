@@ -1,0 +1,65 @@
+.single{
+  width:100% ;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.upload-container{
+  width: 140px;
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upload-label-file {
+  cursor: pointer;
+}
+.upload-label-file svg{
+  padding: 20px 20px 10px 20px;
+}
+
+#upload {
+  display: none;
+}
+
+button {
+  margin-top: 20px;
+  padding: 5px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+.done-icon{
+  position: absolute;
+  top: 20px;
+  left:30px;
+  width: 40px;
+  height: 40px;
+}
+.error-icon{
+  position: absolute;
+  top: 20px;
+  left:30px;
+  width: 40px;
+  height: 40px;
+}
+
+svg {
+  width: 100px;
+  height: 100px;
+}
+
+img {
+  width: 100px;
+  height: 100px;
+}
+.fileName{
+  display: flex;
+}
