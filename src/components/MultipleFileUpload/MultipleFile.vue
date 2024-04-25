@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, defineProps, defineExpose } from 'vue';
 import { uploadFile } from '@/services/api';
 import { useToast } from 'vue-toast-notification';
 
@@ -9,25 +9,36 @@ interface CustomFile {
   size: number;
   status: number;
   uploadedFiles: FileList;
+  errorMessage: string | undefined;
 }
 
-const selectedFiles = ref<CustomFile[]>([]);
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20mb
-const toast = useToast();
+// Define props using defineProps
+const props = withDefaults(
+    defineProps<{
+      maxSize?:number
+    }>(),
+    {
+      maxSize: 20 * 1024 * 1024
+    }
+)
 
-const handleFileChange = (event: Event) => {
-  const files = (event.target as HTMLInputElement)?.files;
-  if (files) {
-    Array.from(files).forEach(file => {
-      selectedFiles.value.push({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        uploadedFiles: files,
-        status: 0,
-      });
+const selectedFiles = ref<CustomFile[]>([]);
+
+const handleFileChange = (event: { target: { files: FileList } }) => {
+  const files = event.target.files;
+  if (!files) return;
+
+  Array.from(files).forEach(file => {
+    const errorMessage = file.size >= props.maxSize ? "File is too large" : undefined;
+    selectedFiles.value.push({
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      uploadedFiles: files,
+      status: 0,
+      errorMessage,
     });
-  }
+  });
 };
 
 const handleRemoveFile = (index: number) => {
@@ -40,7 +51,7 @@ const handleUpload = async () => {
       continue; // Skip already uploaded files
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > props.maxSize) {
       file.status = 2;
     } else {
       const formData = new FormData();
@@ -60,16 +71,18 @@ const handleUpload = async () => {
     }
   }
 };
+//
+// const truncateFileName = (fileName: string, maxLength: number): string => {
+//   if (fileName.length > maxLength) {
+//     return fileName.substring(0, maxLength - 3) + '...';
+//   }
+//   return fileName;
+// };
 
-const truncateFileName = (fileName: string, maxLength: number): string => {
-  if (fileName.length > maxLength) {
-    return fileName.substring(0, maxLength - 3) + '...';
-  }
-  return fileName;
-};
+defineExpose({ handleFileChange });
 </script>
 
-<template>
+<template data-test-error-message>
   <div class="multiple">
     <h2>Multiple File Upload</h2>
     <div class="single-file">
@@ -84,7 +97,7 @@ const truncateFileName = (fileName: string, maxLength: number): string => {
             <img v-else src="../../assets/nomalum.png" alt="other">
             <img src="../../assets/done.png" alt="done" class="done-icon" v-if="file.status === 1">
             <img src="../../assets/error.png" alt="error" class="error-icon" v-else-if="file.status === 2">
-            <p style="max-width: 100px">{{ truncateFileName(file.name, 15) }}</p>
+            <p v-if="file.errorMessage" data-test-error-message>{{file.errorMessage}}</p>
           </div>
         </template>
         <div class="upload-container">

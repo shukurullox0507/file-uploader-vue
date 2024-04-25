@@ -4,9 +4,9 @@ import MultipleFile from "@/components/MultipleFileUpload/MultipleFile.vue";
 </script>
 
 <template>
-  <SingleFile/>
+  <SingleFile max-size-file="4000000"/>
   <hr>
-  <MultipleFile/>
+  <MultipleFile max-size="200000"/>
 </template>
 
 <style scoped>

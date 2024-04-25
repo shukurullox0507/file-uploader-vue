@@ -1,3 +1,69 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { uploadFile } from '@/services/api';
+import { useToast } from 'vue-toast-notification';
+
+interface CustomFile {
+  name: string;
+  type: string;
+  size: number;
+  uploadedFile: File;
+  errorMessage: string | undefined;
+}
+
+const selectedFile = ref<CustomFile | null>(null);
+const props = withDefaults(
+    defineProps<{
+      maxSizeFile?: number
+    }>(),
+    {
+      maxSizeFile: 4 * 1024 * 1024
+    }
+)
+const toast = useToast();
+
+const handleFileUpload = (event: Event) => {
+  const file = (event.target as HTMLInputElement)?.files?.[0];
+  const errorMessage= file.size >= props.maxSizeFile? 'File is too large' :undefined;
+  if (file) {
+    selectedFile.value = {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      uploadedFile: file,
+      errorMessage
+    };
+  }
+};
+
+const handleUpload = async () => {
+  if (!selectedFile.value) {
+    return;
+  }
+
+  if (selectedFile.value.size > props.maxSizeFile) {
+    toast.error('File size exceeds the maximum allowed size');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('tenantId', 'test');
+  formData.append('module', 'test');
+  formData.append('fileName', 'test');
+  formData.append('file', selectedFile.value.uploadedFile);
+
+  try {
+    const response = await uploadFile(formData);
+    toast.success("File uploaded successfully");
+  } catch (error: any) {
+    toast.error(error.message);
+  }
+};
+
+defineExpose({ handleUpload });
+</script>
+
+
 <template>
   <div class="single">
     <h2>Single File Upload</h2>
@@ -15,61 +81,12 @@
         </svg>
         <input id="upload" type="file" @change="handleFileUpload">
       </label>
-      <p v-if="!selectedFile">Tap to choose file</p>
-      <p v-else>{{ selectedFile?.name }}</p>
+      <p v-if="!selectedFile" >Tap to choose file</p>
+      <p v-if="selectedFile?.errorMessage" data-test-error-message >{{selectedFile?.errorMessage}}</p>
     </div>
     <button v-if="selectedFile" @click="handleUpload" >Upload File</button>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue';
-import { uploadFile } from '@/services/api';
-import {useToast} from 'vue-toast-notification';
-
-interface CustomFile {
-  name: string,
-  type: string,
-  size: number,
-  uploadedFile: File,
-}
-
-
-const selectedFile = ref<CustomFile | null>(null);
-const MAX_FILE_SIZE = 20 * 1024 * 1024 // => 20mb
-const toast = useToast()
-const handleFileUpload = (event: Event) => {
-  const file = (event.target as HTMLInputElement)?.files?.[0];
-  if (file) {
-    selectedFile.value = {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      uploadedFile:file,
-    };
-  }
-};
-
-const handleUpload = async () => {
-  if (selectedFile.value.size > MAX_FILE_SIZE) {
-    toast.error('File size exceeds the maximum allowed size');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('tenantId', 'test');
-  formData.append('module', 'test');
-  formData.append('fileName', 'test');
-  formData.append('file', selectedFile.value.uploadedFile);
-
-  try {
-    const response = await uploadFile(formData);
-    toast.success("File uploaded successfully")
-  } catch (error:any) {
-    toast.error(error.message)
-  }
-};
-</script>
 
 <style scoped lang="scss">
 @import './style.scss';
