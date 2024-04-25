@@ -8,6 +8,7 @@ interface CustomFile {
   type: string;
   size: number;
   status: number;
+  errorMessageCount:string | undefined;
   uploadedFiles: FileList;
   errorMessage: string | undefined;
 }
@@ -15,10 +16,12 @@ interface CustomFile {
 // Define props using defineProps
 const props = withDefaults(
     defineProps<{
-      maxSize?:number
+      maxSize?:number,
+      maxCount:number,
     }>(),
     {
-      maxSize: 20 * 1024 * 1024
+      maxSize: 20 * 1024 * 1024,
+      maxCount: 5,
     }
 )
 
@@ -27,8 +30,9 @@ const selectedFiles = ref<CustomFile[]>([]);
 const handleFileChange = (event: { target: { files: FileList } }) => {
   const files = event.target.files;
   if (!files) return;
+  const filesToAdd = Array.from(files).slice(0, props.maxCount - selectedFiles.value.length); // Limit files to be added based on maxCount
 
-  Array.from(files).forEach(file => {
+  filesToAdd.forEach(file => {
     const errorMessage = file.size >= props.maxSize ? "File is too large" : undefined;
     selectedFiles.value.push({
       name: file.name,
@@ -36,6 +40,7 @@ const handleFileChange = (event: { target: { files: FileList } }) => {
       size: file.size,
       uploadedFiles: files,
       status: 0,
+      errorMessageCount: selectedFiles.value.length >= props.maxCount ? "Uploaded files exceeded max count" : undefined, // Check if max count exceeded
       errorMessage,
     });
   });
@@ -99,19 +104,24 @@ defineExpose({ handleFileChange });
             <img src="../../assets/error.png" alt="error" class="error-icon" v-else-if="file.status === 2">
             <p v-if="file.errorMessage" data-test-error-message>{{file.errorMessage}}</p>
           </div>
+
         </template>
+
         <div class="upload-container">
           <label for="uploadInput" class="upload-label">
+
             <svg fill="#000000" width="100px" height="100px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 3.793V9H7V3.864L5.914 4.95 4.5 3.536 8.036 0l.707.707.707.707 2.121 2.122-1.414 1.414L9 3.793zM16 11v5H0v-5h2v3h12v-3h2z" fill-rule="evenodd"/>
             </svg>
             <input id="uploadInput" type="file" multiple @change="handleFileChange">
           </label>
+
           <p>Tap to choose files</p>
         </div>
       </div>
     </div>
     <div class="fileName">
+      <p  data-test-error-count>You can upload {{props.maxCount}} files</p>
       <button @click="handleUpload" v-if="selectedFiles.length>0">Upload File</button>
     </div>
   </div>

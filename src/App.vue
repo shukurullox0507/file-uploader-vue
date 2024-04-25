@@ -6,7 +6,7 @@ import MultipleFile from "@/components/MultipleFileUpload/MultipleFile.vue";
 <template>
   <SingleFile max-size-file="4000000"/>
   <hr>
-  <MultipleFile max-size="200000"/>
+  <MultipleFile max-size="200000" max-count="5"/>
 </template>
 
 <style scoped>
