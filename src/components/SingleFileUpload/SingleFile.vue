@@ -53,10 +53,8 @@ const handleUpload = async () => {
     selectedFile.value.status = 2;
   }
 };
-
 defineExpose({ handleFileUpload });
 </script>
-
 
 <template>
   <div class="single">

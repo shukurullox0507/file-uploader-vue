@@ -7,7 +7,6 @@ import SingleFile from "../SingleFileUpload/SingleFile.vue";
 describe('MultipleFile', () => {
     it('should render File input', () => {
         const wrapper = mount(SingleFile);
-
         expect(wrapper.find('input').html()).toMatchSnapshot();
     });
 

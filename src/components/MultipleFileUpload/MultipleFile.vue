@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, defineProps, defineExpose } from 'vue';
 import { uploadFile } from '@/services/api';
-import { useToast } from 'vue-toast-notification';
 
 interface CustomFile {
   name: string;
@@ -12,7 +11,6 @@ interface CustomFile {
   errorMessage: string | undefined;
 }
 
-// Define props using defineProps
 const props = withDefaults(
     defineProps<{
       maxSize?:number,
@@ -54,14 +52,12 @@ const handleUpload = async () => {
     if (file.status === 1) {
       continue;
     }
-
     if (file.size > props.maxSize) {
       file.status = 2;
     } else {
       try {
         const response = await uploadFile(file.uploadedFiles[0]);
         file.status = 1;
-
       } catch (error: any) {
         file.status = 3;
       }
@@ -91,12 +87,9 @@ defineExpose({ handleFileChange });
             <img src="../../assets/error.png" alt="error" class="error-icon" v-else-if="file.status === 2">
           </div>
           <p v-if="file.errorMessage" data-test-error-message class="error-message">{{file.errorMessage}}</p>
-
         </template>
-
         <div class="upload-container">
           <label for="uploadInput" class="upload-label">
-
             <svg fill="#000000" width="100px" height="100px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 3.793V9H7V3.864L5.914 4.95 4.5 3.536 8.036 0l.707.707.707.707 2.121 2.122-1.414 1.414L9 3.793zM16 11v5H0v-5h2v3h12v-3h2z" fill-rule="evenodd"/>
             </svg>
