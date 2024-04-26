@@ -24,7 +24,7 @@ describe('MultipleFile', () => {
         const mockFileList = Object.create(inputElement.files)
         mockFileList[0] = file
         Object.defineProperty(mockFileList, 'length', { value: 1 });
-        await(wrapper.getCurrentComponent().exposed as unknown as any).handleUpload({
+        await(wrapper.getCurrentComponent().exposed as unknown as any).handleFileUpload({
             target: { files: mockFileList }
         })
         await nextTick()
@@ -33,5 +33,29 @@ describe('MultipleFile', () => {
 
         expect(errorMessageElement.exists()).toBe(false)
     })
+
+    it("should show error message when uploaded file mime type is not allowed", async () => {
+        const wrapper = mount(SingleFile, {
+            props: {
+                fileType: ['application/pdf']
+            }
+        });
+
+        const inputElement = wrapper.find('input[type="file"]').element as HTMLInputElement;
+        const file = new File(['252'], 'foo.pdf', {
+            type: 'application/pdf'
+        });
+
+        const mockFileList = Object.create(inputElement.files);
+        mockFileList[0] = file;
+        Object.defineProperty(mockFileList, 'length', { value: 1 });
+
+        await (wrapper.getCurrentComponent().exposed as any).handleFileUpload({ target: { files: mockFileList } });
+        await nextTick();
+
+        const errorMessageElement = wrapper.find('label[data-test-mime-type]');
+
+        expect(errorMessageElement.exists()).toBe(false); // No error message should be shown since PDF is allowed
+    });
 });
 

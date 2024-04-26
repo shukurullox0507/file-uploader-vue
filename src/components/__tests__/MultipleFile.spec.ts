@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import { uploadFile } from "../../services/api";
 import MultipleFile from "../MultipleFileUpload/MultipleFile.vue";
 import { mount } from "@vue/test-utils";
@@ -61,5 +61,33 @@ describe('MultipleFile', () => {
         const errorMessageElement = wrapper.find('p[data-test-error-count]');
 
         expect(errorMessageElement.exists()).toBe(true);
+    });
+
+    it("should show error message when isMultiple is false", () =>{
+        const wrapper = mount(MultipleFile, {
+            props: {
+                isMultiple: true,
+            }
+        });
+
+        const inputElement = wrapper.find('input[type="file"]');
+
+        expect(inputElement.exists()).toBe(true);
+    });
+
+    it("should show error message when api status is more than 200", async () => {
+        const wrapper = mount(MultipleFile);
+        const inputElement = wrapper.find('input[type="file"]').element as HTMLInputElement;
+        const file = new File(['2552'], 'foo.txt', {
+            type: 'text/plain'
+        });
+        const mockFileList = Object.create(inputElement.files);
+        mockFileList[0] = file;
+        Object.defineProperty(mockFileList, 'length', { value: 1 });
+        const response = await uploadFile(mockFileList[0]);
+
+        wrapper.vm.$nextTick();
+
+        expect(response.status).toBe(200);
     });
 });

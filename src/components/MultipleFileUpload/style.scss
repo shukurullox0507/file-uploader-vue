@@ -7,6 +7,7 @@
 .upload-container{
   border: 1px solid black;
   display: flex;
+  border-radius: 5px;
   flex-direction: column;
   align-items: center;
 }
@@ -55,6 +56,7 @@ img {
 .uploaded-files {
   display: flex;
   flex-wrap: wrap;
+
 }
 
 .file-item {
@@ -67,18 +69,21 @@ img {
   align-items: center;
   justify-content: center;
   position: relative;
-}
-.file-item:hover{
-  .remove-file{
-    display: block;
-  }
+  border: 1px solid black;
+  border-radius:5px ;
+  padding: 30px 20px;
+
 }
 .remove-file{
   position: absolute;
-  top: -10px;
-  right: 0;
+  top: 10px;
+  right:5px;
   width: 15px;
   height: 15px;
+}
+
+.error-message{
+  position: absolute;
   display: none;
 }
 
@@ -87,19 +92,28 @@ img {
   margin-top: 5px;
   font-size: 12px;
 }
-.done-icon{
-  position: absolute;
-  top: 20px;
-  left:30px;
-  width: 40px;
-  height: 40px;
-}
+.done-icon,
 .error-icon{
   position: absolute;
-  top: 20px;
-  left:30px;
-  width: 40px;
-  height: 40px;
+  top: 5px;
+  left:5px;
+  width: 25px;
+  height: 25px;
+}
+.error-message {
+  position: absolute;
+  display: none;
+  background-color: white;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.error-icon:hover + .error-message {
+  display: block;
 }
 
 //.single-file{

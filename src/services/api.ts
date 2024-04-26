@@ -6,10 +6,14 @@ const api = axios.create({
     baseURL,
 });
 
-export async function uploadFile(formData: FormData): Promise<any> {
+export async function uploadFile(file:File): Promise<any> {
+    const formData = new FormData();
+    formData.append('tenantId', 'test');
+    formData.append('module', 'test');
+    formData.append('fileName', 'test');
+    formData.append('file', file);
     try {
-        const response = await api.post('/file/upload/public', formData);
-        return response.data;
+        return await api.post('/file/upload/public', formData);
     } catch (error:any) {
         throw new Error('Error uploading file: ' + error.message);
     }
