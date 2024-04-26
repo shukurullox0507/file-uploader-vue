@@ -28,8 +28,8 @@ const props = withDefaults(
 
 const selectedFiles = ref<CustomFile[]>([]);
 
-const handleFileChange = (event: { target: { files: FileList } }) => {
-  const files = event.target.files;
+const handleFileChange = (event:Event) => {
+  const files = (event.target as HTMLInputElement).files;
   if (!files) return;
   const filesToAdd = Array.from(files).slice(0, props.maxCount - selectedFiles.value.length);
 
@@ -45,7 +45,6 @@ const handleFileChange = (event: { target: { files: FileList } }) => {
     });
   });
 };
-
 const handleRemoveFile = (index: number) => {
   selectedFiles.value.splice(index, 1);
 };
@@ -69,13 +68,6 @@ const handleUpload = async () => {
     }
   }
 };
-//
-// const truncateFileName = (fileName: string, maxLength: number): string => {
-//   if (fileName.length > maxLength) {
-//     return fileName.substring(0, maxLength - 3) + '...';
-//   }
-//   return fileName;
-// };
 
 defineExpose({ handleFileChange });
 </script>
@@ -108,7 +100,7 @@ defineExpose({ handleFileChange });
             <svg fill="#000000" width="100px" height="100px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 3.793V9H7V3.864L5.914 4.95 4.5 3.536 8.036 0l.707.707.707.707 2.121 2.122-1.414 1.414L9 3.793zM16 11v5H0v-5h2v3h12v-3h2z" fill-rule="evenodd"/>
             </svg>
-            <input id="uploadInput" type="file" :multiple="props.isMultiple" @change="handleFileChange">
+            <input id="uploadInput" type="file" :multiple="props.isMultiple" @change="handleFileChange($event)">
           </label>
           <p>Tap to choose files</p>
         </div>
