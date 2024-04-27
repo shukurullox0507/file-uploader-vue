@@ -6,17 +6,17 @@
 }
 .upload-container{
   width: 140px;
+  height: auto;
   border: 1px solid black;
   position: relative;
   display: flex;
+  flex-direction: column;
   border-radius: 5px;
   justify-content: center;
-  flex-direction: column;
   align-items: center;
 }
 
-.done-icon,
-.error-icon{
+.status-icon{
   position: absolute;
   top: 5px;
   left:5px;
@@ -49,7 +49,9 @@ button:hover {
   background-color: #0056b3;
 }
 
-
+.file-icon{
+padding: 20px 10px;
+}
 svg {
   width: 100px;
   height: 100px;

@@ -1,4 +1,4 @@
-import {describe, expect, it, vi} from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { uploadFile } from "../../services/api";
 import MultipleFile from "../MultipleFileUpload/MultipleFile.vue";
 import { mount } from "@vue/test-utils";
@@ -6,7 +6,13 @@ import { nextTick } from "vue";
 
 describe('MultipleFile', () => {
     it('should render File input', () => {
-        const wrapper = mount(MultipleFile);
+        const wrapper = mount(MultipleFile,{
+            props:{
+                isMultiple:true,
+                maxCount:5,
+                maxSize:2
+            }
+        });
 
         expect(wrapper.find('input').html()).toMatchSnapshot();
     });
@@ -14,7 +20,9 @@ describe('MultipleFile', () => {
     it('should show error message when uploaded file more than 4bytes when maxSize is 4', async () => {
         const wrapper = mount(MultipleFile, {
             props: {
-                maxSize: 2
+                maxSize: 2,
+                isMultiple:true,
+                maxCount:5,
             }
         });
         const inputElement = wrapper.find('input[type="file"]').element as HTMLInputElement;
@@ -24,7 +32,9 @@ describe('MultipleFile', () => {
         const mockFileList = Object.create(inputElement.files);
         mockFileList[0] = file;
         Object.defineProperty(mockFileList, 'length', { value: 1 });
-        wrapper.vm.handleFileChange({ target: { files: mockFileList } });
+        await(wrapper.getCurrentComponent().exposed as unknown as any).handleFileChange({
+            target: { files: mockFileList }
+        });
         await nextTick();
 
         const errorMessageElement = wrapper.find('p[data-test-error-message]');
@@ -35,7 +45,9 @@ describe('MultipleFile', () => {
     it("should show error message when uploaded file count exceeds maxCount", async () => {
         const wrapper = mount(MultipleFile, {
             props: {
-                maxCount: 5
+                maxCount: 5,
+                isMultiple:true,
+                maxSize:2,
             }
         });
         const inputElement = wrapper.find('input[type="file"]').element as HTMLInputElement;
@@ -55,7 +67,9 @@ describe('MultipleFile', () => {
         });
         Object.defineProperty(mockFileList, 'length', { value: filesToUpload.length });
 
-        wrapper.vm.handleFileChange({ target: { files: mockFileList } });
+        await(wrapper.getCurrentComponent().exposed as unknown as any).handleFileChange({
+            target: {files: mockFileList }
+        });
         await nextTick();
 
         const errorMessageElement = wrapper.find('p[data-test-error-count]');
@@ -66,8 +80,9 @@ describe('MultipleFile', () => {
     it("should show error message when isMultiple is false", () =>{
         const wrapper = mount(MultipleFile, {
             props: {
-                isMultiple: true,
-            }
+                maxCount: 5,
+                isMultiple:true,
+                maxSize:2,            }
         });
 
         const inputElement = wrapper.find('input[type="file"]');

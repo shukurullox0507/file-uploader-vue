@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, defineProps, defineExpose } from 'vue';
 import { uploadFile } from '@/services/api';
+import {
+  FileType} from "@/utils/FileType";
+import {STATUS} from "@/constants/status";
 
 interface CustomFile {
   name: string;
@@ -8,21 +11,18 @@ interface CustomFile {
   size: number;
   status: number;
   uploadedFiles: FileList;
+  img:string;
   errorMessage: string | undefined;
 }
 
-const props = withDefaults(
-    defineProps<{
-      maxSize?:number,
-      maxCount?:number,
-      isMultiple?:boolean,
-    }>(),
-    {
-      maxSize: 20 * 1024 * 1024,
-      maxCount: 5,
-      isMultiple:true,
-    }
-)
+interface Props {
+  maxSize:number,
+  maxCount:number,
+  isMultiple:boolean,
+}
+
+const props = defineProps<Props>();
+
 
 const selectedFiles = ref<CustomFile[]>([]);
 
@@ -38,10 +38,13 @@ const handleFileChange = (event:Event) => {
       type: file.type,
       size: file.size,
       uploadedFiles: files,
+      img: FileType(file),
       status: 0,
       errorMessage,
     });
   });
+
+
 };
 const handleRemoveFile = (index: number) => {
   selectedFiles.value.splice(index, 1);
@@ -49,17 +52,18 @@ const handleRemoveFile = (index: number) => {
 
 const handleUpload = async () => {
   for (const file of selectedFiles.value) {
-    if (file.status === 1) {
+    if (file.status === STATUS.success) {
       continue;
     }
     if (file.size > props.maxSize) {
-      file.status = 2;
+      file.status = STATUS.error;
     } else {
       try {
-        const response = await uploadFile(file.uploadedFiles[0]);
-        file.status = 1;
+        file.status = STATUS.success;
+        await uploadFile(file.uploadedFiles[0]);
       } catch (error: any) {
-        file.status = 3;
+        file.status = STATUS.error;
+        console.log(error.message)
       }
     }
   }
@@ -77,14 +81,10 @@ defineExpose({ handleFileChange });
       <div class="uploaded-files">
         <template v-for="(file, index) in selectedFiles">
           <div class="file-item">
-            <img src="../icons/img.png" alt="" @click.stop="handleRemoveFile(index)" class="remove-file">
-            <img v-if="file.type.includes('zip')" src="../../assets/folder_zip.png" class="file-icons" alt="zip">
-            <img v-else-if="file.type.includes('html')" src="../assets/html.png" class="file-icons"  alt="html">
-            <img v-else-if="file.type.includes('pdf')" src="../../assets/pdf.png" class="file-icons" alt="pdf">
-            <img v-else-if="file.type.includes('sql')" src="../../assets/sql.png" class="file-icons" alt="sql">
-            <img v-else src="../../assets/nomalum.png" class="file-icons" alt="other">
-            <img src="../../assets/done.png" alt="done" class="done-icon" v-if="file.status === 1">
-            <img src="../../assets/error.png" alt="error" class="error-icon" v-else-if="file.status === 2">
+            <img src="../../assets/img.png" alt="" @click.stop="handleRemoveFile(index)" class="remove-file">
+            <img :src="file.img" class="file-icons" alt="zip">
+            <img src="../../assets/done.png" alt="done" class="status-icon" v-if="file.status === STATUS.success">
+            <img src="../../assets/error.png" alt="error" class="status-icon" v-else-if="file.status === STATUS.error">
           </div>
           <p v-if="file.errorMessage" data-test-error-message class="error-message">{{file.errorMessage}}</p>
         </template>

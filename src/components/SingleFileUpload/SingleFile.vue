@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import {ref} from 'vue';
 import { uploadFile } from '@/services/api';
+import {FileType} from "@/utils/FileType";
+import {STATUS} from "@/constants/status";
 
 interface CustomFile {
   name: string;
@@ -9,19 +11,16 @@ interface CustomFile {
   status:number;
   uploadedFile: File;
   errorMessage: string | undefined;
+  img: string;
 }
 
 const selectedFile = ref<CustomFile | null>(null);
-const props = withDefaults(
-    defineProps<{
-      maxSizeFile?: number,
-      fileType?: string[],
-    }>(),
-    {
-      maxSizeFile: 4 * 1024 * 1024,
-      fileType:undefined,
-    }
-)
+
+interface Props{
+  maxSizeFile: number,
+  fileType: string[],
+}
+const props = defineProps<Props>()
 
 const handleFileUpload = (event: Event) => {
   const file = (event.target as HTMLInputElement)?.files?.[0];
@@ -32,6 +31,7 @@ const handleFileUpload = (event: Event) => {
       type: file.type,
       size: file.size,
       status:0,
+      img: FileType(file),
       uploadedFile: file,
       errorMessage
     };
@@ -43,14 +43,14 @@ const handleUpload = async () => {
     return;
   }
   if (selectedFile.value.size > props.maxSizeFile) {
-    selectedFile.value.status = 2;
+    selectedFile.value.status = STATUS.error;
     return;
   }
   try {
-    selectedFile.value.status = 1;
+    selectedFile.value.status = STATUS.success;
     return await uploadFile(selectedFile.value.uploadedFile);
   } catch (error: any) {
-    selectedFile.value.status = 2;
+    selectedFile.value.status = STATUS.error;
   }
 };
 defineExpose({ handleFileUpload });
@@ -62,13 +62,9 @@ defineExpose({ handleFileUpload });
     <div class="upload-container">
       <label :id="selectedFile?.type ? 'data-test-mime-type' : undefined" for="upload" class="upload-label-file">
         <div v-if="selectedFile" >
-          <img v-if="selectedFile?.type.includes('zip')" src="../../assets/folder_zip.png" alt="zip">
-          <img v-else-if="selectedFile?.type.includes('html')" src="../assets/html.png" alt="html">
-          <img v-else-if="selectedFile?.type.includes('pdf')" src="../../assets/pdf.png" alt="pdf">
-          <img v-else-if="selectedFile?.type.includes('sql')" src="../../assets/sql.png" alt="sql">
-          <img v-else src="../../assets/nomalum.png" alt="other">
-          <img src="../../assets/done.png" alt="done" class="done-icon" v-if="selectedFile.status === 1">
-          <img src="../../assets/error.png" alt="error" class="error-icon" v-else-if="selectedFile.status === 2">
+          <img :src="selectedFile.img" alt="" class="file-icon"/>
+          <img src="../../assets/done.png" alt="done" class="status-icon" v-if="selectedFile.status === STATUS.success">
+          <img src="../../assets/error.png" alt="error" class="status-icon" v-else-if="selectedFile.status === STATUS.error">
         </div>
         <svg v-else fill="#000000" width="100px" height="100px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
           <path d="M9 3.793V9H7V3.864L5.914 4.95 4.5 3.536 8.036 0l.707.707.707.707 2.121 2.122-1.414 1.414L9 3.793zM16 11v5H0v-5h2v3h12v-3h2z" fill-rule="evenodd"/>
@@ -76,7 +72,7 @@ defineExpose({ handleFileUpload });
         <input id="upload" type="file" @change="handleFileUpload($event)">
       </label>
       <p v-if="!selectedFile" >Tap to choose file</p>
-      <p v-if="selectedFile?.errorMessage" data-test-error-message >{{selectedFile?.errorMessage}}</p>
+      <p v-if="selectedFile?.errorMessage" data-test-error-message ></p>
     </div>
     <button v-if="selectedFile" @click="handleUpload" >Upload File</button>
   </div>

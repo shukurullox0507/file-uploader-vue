@@ -13,7 +13,8 @@ describe('MultipleFile', () => {
     it('should show error message when uploaded file more than 4bytes when maxSize is 4', async () => {
         const wrapper = mount(SingleFile, {
             props: {
-                maxSizeFile: 4
+                maxSizeFile: 4,
+                fileType: ['text/plain'],
             }
         })
         const inputElement = wrapper.find('input[type="file"]').element as HTMLInputElement
@@ -36,7 +37,8 @@ describe('MultipleFile', () => {
     it("should show error message when uploaded file mime type is not allowed", async () => {
         const wrapper = mount(SingleFile, {
             props: {
-                fileType: ['application/pdf']
+                fileType: ['application/pdf'],
+                maxSizeFile: 4,
             }
         });
 
